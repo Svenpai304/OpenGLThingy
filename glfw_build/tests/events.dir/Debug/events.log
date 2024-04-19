@@ -1,0 +1,5 @@
+﻿  Building Custom Rule C:/Users/svenv/Documents/GitHub/OpenGLThingy/glfw-3.4/tests/CMakeLists.txt
+  events.c
+  getopt.c
+  Generating Code...
+  events.vcxproj -> C:\Users\svenv\Documents\GitHub\OpenGLThingy\glfw_build\tests\Debug\events.exe

@@ -40,7 +40,7 @@ int main() {
 		glUseProgram(simpleProgram);
 
 		glBindVertexArray(triVAO);
-		glDrawArrays(GL_TRIANGLES, 0, triSize);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, triSize);
 
 		// Swap & poll
 		glfwSwapBuffers(window);
@@ -103,7 +103,10 @@ void createTriangle(GLuint& vao, int& size) {
 	float vertices[] = {
 	-0.5f, -0.5f, 0.0f,
 	 0.5f, -0.5f, 0.0f,
-	 0.0f,  0.5f, 0.0f
+	 -0.5f,  0.5f, 0.0f,
+
+	 0.5f, 0.5f, 0.0f
+
 	};
 	size = sizeof(vertices);
 

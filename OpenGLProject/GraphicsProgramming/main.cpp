@@ -14,7 +14,7 @@ void initWindow(GLFWwindow*& window);
 void processInput(GLFWwindow* window);
 void loadFile(const char* filename, char** output);
 
-void createTriangle(GLuint& vao, GLuint& ebo, int& size, int& numIndices);
+void createTriangles(GLuint& vao, GLuint& ebo, int& size, int& numIndices);
 void createShaders();
 void createProgram(GLuint& program, const char* vertex, const char* fragment);
 GLuint loadTexture(const char* path);
@@ -31,7 +31,7 @@ int main() {
 
 	GLuint triVAO, triEBO;
 	int triSize, triIndexCount;
-	createTriangle(triVAO, triEBO, triSize, triIndexCount);
+	createTriangles(triVAO, triEBO, triSize, triIndexCount);
 	createShaders();
 
 	GLuint tex = loadTexture("textures/rawr.PNG");
@@ -51,6 +51,9 @@ int main() {
 	//Projection matrix
 	glm::mat4 projection = glm::perspective(45.0f, WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 
+	glm::vec3 lightPosition = glm::vec3(7, 5, 2);
+
+
 	// Main loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -66,9 +69,13 @@ int main() {
 		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "world"), 1, GL_FALSE, glm::value_ptr(world));
 		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		glUniform3fv(glGetUniformLocation(simpleProgram, "lightPosition"), 1, glm::value_ptr(lightPosition));
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, tex);
 
 		glBindVertexArray(triVAO);
-		glDrawElements(GL_TRIANGLES, triSize, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, triIndexCount, GL_UNSIGNED_INT, 0);
 
 		// Swap & poll
 		glfwSwapBuffers(window);
@@ -126,7 +133,7 @@ void loadFile(const char* filename, char** output) {
 	}
 }
 
-void createTriangle(GLuint& vao, GLuint& ebo, int& size, int& numIndices) {
+void createTriangles(GLuint& vao, GLuint& ebo, int& size, int& numIndices) {
 
 	// need 24 vertices for normal/uv-mapped Cube
 	float vertices[] = {
@@ -212,6 +219,12 @@ void createTriangle(GLuint& vao, GLuint& ebo, int& size, int& numIndices) {
 
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_TRUE, stride, (void*)(8 * sizeof(float)));
+	glEnableVertexAttribArray(3);
 }
 
 void createShaders() {

@@ -3,6 +3,13 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 void initWindow(GLFWwindow*& window);
 void processInput(GLFWwindow* window);
 void loadFile(const char* filename, char** output);
@@ -10,8 +17,11 @@ void loadFile(const char* filename, char** output);
 void createTriangle(GLuint& vao, GLuint& ebo, int& size, int& numIndices);
 void createShaders();
 void createProgram(GLuint& program, const char* vertex, const char* fragment);
+GLuint loadTexture(const char* path);
 
 GLuint simpleProgram;
+
+const int WIDTH = 1920, HEIGHT = 1080;
 
 int main() {
 	std::cout << "we ballin" << std::endl;
@@ -24,8 +34,22 @@ int main() {
 	createTriangle(triVAO, triEBO, triSize, triIndexCount);
 	createShaders();
 
+	GLuint tex = loadTexture("textures/rawr.PNG");
+
 	// Create viewport
-	glViewport(0, 0, 1920, 1080);
+	glViewport(0, 0, WIDTH, HEIGHT);
+
+	// World matrix
+	glm::mat4 world = glm::mat4(1.0f);
+	world = glm::rotate(world, glm::radians(45.0f), glm::vec3(0, 1, 0));
+	world = glm::scale(world, glm::vec3(1, 1, 1));
+	world = glm::translate(world, glm::vec3(0, 0, 0));
+
+	//Camera view
+	glm::mat4 view = glm::lookAt(glm::vec3(0, 2.5f, -5.0f), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+
+	//Projection matrix
+	glm::mat4 projection = glm::perspective(45.0f, WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 
 	// Main loop
 	while (!glfwWindowShouldClose(window))
@@ -38,6 +62,10 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glUseProgram(simpleProgram);
+
+		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "world"), 1, GL_FALSE, glm::value_ptr(world));
+		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 		glBindVertexArray(triVAO);
 		glDrawElements(GL_TRIANGLES, triSize, GL_UNSIGNED_INT, 0);
@@ -99,7 +127,7 @@ void loadFile(const char* filename, char** output) {
 }
 
 void createTriangle(GLuint& vao, GLuint& ebo, int& size, int& numIndices) {
-	
+
 	// need 24 vertices for normal/uv-mapped Cube
 	float vertices[] = {
 		// positions            //colors            // tex coords   // normals
@@ -231,4 +259,35 @@ void createProgram(GLuint& programID, const char* vertex, const char* fragment) 
 
 	delete vertexSrc;
 	delete fragmentSrc;
+}
+
+GLuint loadTexture(const char* path)
+{
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int width, height, numChannels;
+	unsigned char* data = stbi_load(path, &width, &height, &numChannels, 0);
+	if (data) {
+		if (numChannels == 3) {
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		}
+		if (numChannels == 4) {
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		}
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		std::cout << "Error loading texture: " << path << std::endl;
+	}
+
+	stbi_image_free(data);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	return textureID;
 }

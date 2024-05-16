@@ -48,14 +48,18 @@ int main() {
 	world = glm::scale(world, glm::vec3(1, 1, 1));
 	world = glm::translate(world, glm::vec3(0, 0, 0));
 
-	//Camera view
+	// Camera view
 	glm::mat4 view = glm::lookAt(cameraPosition, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
-	//Projection matrix
+	// Projection matrix
 	glm::mat4 projection = glm::perspective(glm::radians(25.0f), WIDTH / (float)HEIGHT, 0.1f, 100.0f);
-
-	glm::vec3 lightPosition = glm::vec3(4, 6, 2);
-
+	
+	// Light xyz positions + strength value
+	const int lightsCount = 2;
+	glm::vec4 lights[lightsCount] = {
+		glm::vec4(4, 6, 2, 1),
+		glm::vec4(-8, -4, -1, 1)
+	};
 
 	// Main loop
 	while (!glfwWindowShouldClose(window))
@@ -75,8 +79,9 @@ int main() {
 		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "world"), 1, GL_FALSE, glm::value_ptr(world));
 		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-		glUniform3fv(glGetUniformLocation(simpleProgram, "lightPosition"), 1, glm::value_ptr(lightPosition));
-		//glUniform3fv(glGetUniformLocation(simpleProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
+		glUniform1i(glGetUniformLocation(simpleProgram, "lightsCount"), lightsCount);
+		glUniform4fv(glGetUniformLocation(simpleProgram, "lights"), lightsCount, &(lights[0].x));
+		glUniform3fv(glGetUniformLocation(simpleProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, tex);

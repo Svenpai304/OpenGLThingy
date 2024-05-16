@@ -27,7 +27,7 @@ void main() {
 	// Lighting
 
 	float lightValue = max(-dot(normal, lightDir), 0.0);
-	float specular = pow(max(-dot(reflDir, viewDir), 0.0), 60);
+	float specular = pow(max(dot(reflDir, viewDir), 0.0), 128);
 
 	vec4 clrOutput = vec4(color, 1.0f) * texture(mainTex, uv);
 	clrOutput.rgb = clrOutput.rgb * min(lightValue + 0.1, 1.0) + specular;

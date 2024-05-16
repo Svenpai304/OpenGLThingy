@@ -54,7 +54,7 @@ int main() {
 	//Projection matrix
 	glm::mat4 projection = glm::perspective(glm::radians(25.0f), WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 
-	glm::vec3 lightPosition = glm::vec3(0, 5, 2);
+	glm::vec3 lightPosition = glm::vec3(4, 6, 2);
 
 
 	// Main loop
